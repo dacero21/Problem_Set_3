@@ -85,30 +85,32 @@ test_df_valor_referencia = st_join(test_df_estrato,valor_ref_2023 %>%
 
 
 
+# filtrar la localidad de chapinero
+chapinero = localidades %>%
+  filter(LocCodigo == '02')
+
+barrios_chapinero = catastro %>%
+  mutate(geometry = st_make_valid(geometry)) %>%
+  st_intersection(chapinero)
+
+estratos_chapinero = st_join(barrios_chapinero,estratificacion %>% 
+                             select(ESTRATO,geometry) %>% 
+                             mutate(geometry = st_make_valid(geometry)),join = st_nearest_feature)
 
 
+ggplot() +
+  # geom_sf(data = chapinero) +
+  geom_sf(data = estratos_chapinero, aes(fill = factor(ESTRATO))) +
+  theme_minimal() +
+  theme(legend.position = "right") + # Posicionar la leyenda
+  labs(fill = "Estrato",title = 'Estratos en Chapinero')
 
-# # filtrar la localidad de chapinero
-# chapinero = localidades %>% 
-#   filter(LocCodigo == '02')
-# 
-# barrios_chapinero = catastro %>% 
-#   mutate(geometry = st_make_valid(geometry)) %>% 
-#   st_intersection(chapinero)
-# 
-# 
-# ggplot() + 
-#   # geom_sf(data = chapinero) + 
-#   geom_sf(data = barrios_chapinero) +
-#   geom_sf(data = test_df,col = 'red')
-#   
-# 
-# ggplot()+ 
-#   geom_sf(data = estratificacion %>% 
-#             filter(ESTRATO == 0))
-# 
-# 
-# ggplot()+ 
-#   geom_sf(data = estratificacion %>% 
-#             filter(OBJECTID == '661444'))
+
+ggplot()+
+  geom_sf(data = estratificacion)
+
+
+ggplot()+
+  geom_sf(data = estratificacion %>%
+            filter(OBJECTID == '661444'))
 

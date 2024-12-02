@@ -72,15 +72,86 @@ Por su parte, Adetunji et al. (2022) demostraron que el algoritmo Random Forest 
 
 
 \section{Datos}
-\section{Modelos y resultados} 
-\section{Conclusiones y recomendaciones}
-\section{Referencias}
+
+
+La base de datos utilizada para este proyecto se construyó a partir de múltiples fuentes de información con el objetivo de desarrollar un modelo predictivo para estimar los precios de propiedades en el barrio de Chapinero en Bogotá. Los datos incluyen tanto atributos estructurales como contextuales, que permiten capturar la heterogeneidad de las propiedades en la ciudad. El proceso de construcción de la base de datos incluyó las siguientes etapas:
+
+\subsection{Extracción de atributos estructurales a partir de descripciones textuales}
+
+Se utilizó la API de OpenAI para procesar los textos del título y la descripción de cada propiedad, de donde se extrajeron las siguientes variables:
 
 \begin{itemize}
-  \item Adetunji, A. B., Akande, O. N., Ajala, F. A., Oyewo, O., Akande, Y. F., & Oluwadara, G. (2021). House price prediction using random forest machine learning technique. Procedia Computer Science, 199, 806–813. 
-  \item Varma, A., Sarma, A., Doshi, S., & Nair, R. (2018). House price prediction using machine learning and neural networks. 
-  \item Truong, Q., Nguyen, M., Dang, H., & Mei, B. (2020). Housing price prediction via improved machine learning techniques. Procedia Computer Science, 174, 433–442. 
+
+\item  \textbf{Metros cuadrados de las viviendas:} Esta es una de las variables más importantes en la valoración inmobiliaria. El tamaño de una propiedad tiene una relación directa con su precio, ya que representa la superficie habitable disponible. Propiedades más grandes suelen ser más costosas, aunque el impacto del tamaño puede variar dependiendo del barrio y la categoría de la vivienda.
+
+\item  \textbf{Número de cuartos:} El número de habitaciones es un factor determinante en la funcionalidad de una vivienda. En zonas urbanas densamente pobladas como Chapinero, una mayor cantidad de cuartos tiende a incrementar el precio de la propiedad, ya que aumenta su atractivo para familias o grupos que necesitan espacio adicional.
+
+\item  \textbf{Cuenta con parqueadero:} Este un factor crucial en áreas urbanas densamente pobladas, donde el espacio es limitado y el estacionamiento es escaso. Contar con un parqueadero privado puede agregar un valor considerable a una propiedad, ya que proporciona una solución práctica y segura para los residentes que poseen vehículos.
+
+\item  \textbf{Cuenta con ascensor:}  Esta característica especialmente relevante en edificios altos, donde su ausencia podría limitar el acceso a pisos superiores, particularmente para personas mayores o con movilidad reducida. Un ascensor mejora la accesibilidad, facilita el transporte de objetos pesados y eleva el nivel de confort para los residentes. 
+
+\item  \textbf{Categoría:} Se clasificaron las propiedades en apartaestudios, apartamentos, casas, penthouses u otros. Esto permite capturar diferencias significativas en el mercado. Cada categoría responde a diferentes segmentos de demanda, y sus precios reflejan las características específicas de cada tipo de vivienda, como lujo, tamaño, o ubicación dentro de la ciudad.
+
 \end{itemize}
+
+\subsection{Enriquecimiento de datos con fuentes externas:}
+
+\begin{itemize}
+
+\item  \textbf{Estrato socioeconómico:} Este es un indicador clave en la valoración de propiedades en Colombia, ya que está asociado con la calidad de los servicios públicos, la infraestructura del barrio y el nivel socioeconómico de los residentes. Estratos más altos generalmente corresponden a precios más altos debido a la percepción de mayor calidad de vida y mejores servicios.
+
+\item  \textbf{Valor de referencia del metro cuadrado por manzana:} Este valor representa la mediana del precio por metro cuadrado en cada manzana y proporciona un indicador robusto del nivel de precios en la zona. Es una medida crucial para capturar las variaciones espaciales en el valor del suelo urbano, lo cual es fundamental para predecir los precios de las propiedades.
+
+\item  \textbf{Área construida m2 por manzana:} La densidad de construcción en una manzana puede influir en el precio de las propiedades, ya que refleja la intensidad de uso del suelo. Zonas con alta densidad construida suelen tener mayor actividad comercial y de servicios, lo que puede aumentar el valor de las propiedades residenciales.
+
+\item  \textbf{Cantidad de predios residenciales por manzana:} Esta variable indica el nivel de urbanización y la composición residencial de la zona. Un mayor número de predios residenciales puede estar asociado con áreas más consolidadas y deseables para vivir, lo cual impacta positivamente en el valor de las propiedades.
+
+
+\end{itemize}
+
+\subsection{ Análisis descriptivo de los datos}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Cargar librerías necesarias
+library(tibble)  
+library(knitr)  
+library(kableExtra)  
+
+# Leer el archivo .rds
+data <- readRDS("est_descriptivas.rds")
+
+data %>%
+  as_tibble() %>%
+  kable("latex", booktabs = TRUE, longtable = TRUE) %>%
+  kable_styling(latex_options = c("striped", "hold_position"))
+
+```
+
+La tabla presenta estadísticas descriptivas de cuatro variables inmobiliarias. La variable metros cuadrados (m2) tiene un promedio de 445 m², con una alta variabilidad reflejada en una desviación estándar de 1,971 m². El tamaño mínimo registrado es de 30 m², mientras que el máximo alcanza los 29,890 m², indicando la presencia de propiedades muy diversas en tamaño. El número de cuartos (n_cuartos) promedio es de 3, con una desviación estándar de 2 cuartos, lo que sugiere que la mayoría de las viviendas están diseñadas para familias pequeñas o medianas. El rango oscila entre 1 y 80 cuartos, destacando la diversidad en la capacidad de las propiedades.
+
+Los metros cuadrados construidos por manzana (m2_manzana) tienen un promedio de 25,300 m² y una desviación estándar de 28,791 m², mostrando diferencias significativas en la densidad de construcción. El mínimo registrado es de 24 m² y el máximo de 243,793 m². Finalmente, el número de predios residenciales por manzana (n_predios_manzana) tiene un promedio de 245 predios, con una desviación estándar de 319. El número mínimo de predios es 1, mientras que el máximo alcanza 4,543, indicando áreas con alta densidad residencial.
+
+```{r, echo=FALSE, out.width="100%"}
+# Cargar la imagen en el documento
+knitr::include_graphics("Estratos en chapinero.png")
+
+```
+\section{Modelos y resultados} 
+
+
+
+
+\section{Conclusiones y recomendaciones}
+
+
+\section{Referencias}
+
+
+<!-- \begin{itemize} -->
+<!--   \item Adetunji, A. B., Akande, O. N., Ajala, F. A., Oyewo, O., Akande, Y. F., & Oluwadara, G. (2021). House price prediction using random forest machine learning technique. Procedia Computer Science, 199, 806–813.  -->
+<!--   \item Varma, A., Sarma, A., Doshi, S., & Nair, R. (2018). House price prediction using machine learning and neural networks.  -->
+<!--   \item Truong, Q., Nguyen, M., Dang, H., & Mei, B. (2020). Housing price prediction via improved machine learning techniques. Procedia Computer Science, 174, 433–442.  -->
+<!-- \end{itemize} -->
 
 
 
