@@ -7,6 +7,7 @@ library(sf)
 library(dplyr)
 library(ggplot2)
 library(stringr)
+library(scales)
 
 # Leer las localidades. 
 localidades = read_sf('Data/loca')
@@ -97,6 +98,9 @@ estratos_chapinero = st_join(barrios_chapinero,estratificacion %>%
                              select(ESTRATO,geometry) %>% 
                              mutate(geometry = st_make_valid(geometry)),join = st_nearest_feature)
 
+valor_referencia_chapinero = st_join(barrios_chapinero,valor_ref_2023 %>% 
+                                       select(V_REF,geometry) %>% 
+                                       mutate(geometry = st_make_valid(geometry)),join = st_nearest_feature)
 
 ggplot() +
   # geom_sf(data = chapinero) +
@@ -106,11 +110,19 @@ ggplot() +
   labs(fill = "Estrato",title = 'Estratos en Chapinero')
 
 
-ggplot()+
-  geom_sf(data = estratificacion)
+ggplot() +
+  # geom_sf(data = chapinero) +
+  geom_sf(data = valor_referencia_chapinero, aes(fill = V_REF)) +
+  scale_fill_continuous(labels = label_dollar(prefix = "$", scale = 1)) + 
+  theme_minimal() +
+  theme(legend.position = "right") + # Posicionar la leyenda
+  labs(fill = "Valores de referncia",title = 'Valores de referencia',subtitle = 'Barrios de chapinero')
 
-
-ggplot()+
-  geom_sf(data = estratificacion %>%
-            filter(OBJECTID == '661444'))
+# ggplot()+
+#   geom_sf(data = estratificacion)
+# 
+# 
+# ggplot()+
+#   geom_sf(data = estratificacion %>%
+#             filter(OBJECTID == '661444'))
 
